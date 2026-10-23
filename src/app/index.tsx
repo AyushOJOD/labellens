@@ -1,7 +1,7 @@
 ﻿import AnalysisResults from "@/features/analysis/AnalysisResults";
 import BarcodeScannerModal from "@/features/barcode/BarcodeScannerModal";
 
-const API_BASE_URL = "http://192.168.29.101:5000";
+import { API_BASE_URL } from "@/config/api";
 import {
   deleteScan,
   getScans,
