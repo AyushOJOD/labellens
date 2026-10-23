@@ -385,14 +385,9 @@ export default function HomeScreen() {
                         )}
                       </View>
                       <View style={styles.heroAnalyzeTextCol}>
-                        <View style={styles.heroAnalyzeTitleRow}>
-                          <Text style={styles.heroAnalyzeTitle}>
-                            {isAnalyzing ? "Analyzing Label..." : "Analyze Nutrition"}
-                          </Text>
-                          <View style={styles.heroAiBadge}>
-                            <Text style={styles.heroAiBadgeText}>✨ AI Vision</Text>
-                          </View>
-                        </View>
+                        <Text style={styles.heroAnalyzeTitle}>
+                          {isAnalyzing ? "Analyzing Label..." : "Analyze Nutrition"}
+                        </Text>
                         <Text style={styles.heroAnalyzeSubtitle}>
                           {isAnalyzing
                             ? "Reading FSSAI metrics, palm oil & ingredients..."
@@ -407,21 +402,33 @@ export default function HomeScreen() {
 
                   <View style={styles.selectedImageActions}>
                     <Pressable
-                      style={styles.retakePhotoButton}
+                      style={({ pressed }) => [
+                        styles.retakePhotoButton,
+                        pressed && styles.buttonPressed,
+                      ]}
                       onPress={handleScan}
                       disabled={isAnalyzing}
+                      accessibilityRole="button"
+                      accessibilityLabel="Retake or choose another photo"
                     >
-                      <Text style={styles.retakePhotoText}>📷 Retake / Choose another</Text>
+                      <Text style={styles.retakePhotoEmoji}>📷</Text>
+                      <Text style={styles.retakePhotoText}>Retake / Change</Text>
                     </Pressable>
                     <Pressable
-                      style={styles.clearPhotoButton}
+                      style={({ pressed }) => [
+                        styles.clearPhotoButton,
+                        pressed && styles.buttonPressed,
+                      ]}
                       onPress={() => {
                         setSelectedImage(null);
                         setAnalysis(null);
                       }}
                       disabled={isAnalyzing}
+                      accessibilityRole="button"
+                      accessibilityLabel="Remove photo"
                     >
-                      <Text style={styles.clearPhotoText}>✕ Remove</Text>
+                      <Text style={styles.clearPhotoEmoji}>✕</Text>
+                      <Text style={styles.clearPhotoText}>Remove</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -1268,27 +1275,11 @@ const styles = StyleSheet.create({
   heroAnalyzeTextCol: {
     flex: 1,
   },
-  heroAnalyzeTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   heroAnalyzeTitle: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "900",
     letterSpacing: 0.3,
-  },
-  heroAiBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  heroAiBadgeText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "800",
   },
   heroAnalyzeSubtitle: {
     color: "#D1FAE5",
@@ -1312,27 +1303,61 @@ const styles = StyleSheet.create({
   },
   selectedImageActions: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 8,
-    paddingHorizontal: 4,
+    gap: 10,
+    marginTop: 10,
   },
   retakePhotoButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    flex: 2,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 13,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#D1D5DB",
+    gap: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  retakePhotoEmoji: {
+    fontSize: 14,
   },
   retakePhotoText: {
     color: "#183B2D",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700",
   },
   clearPhotoButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 13,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#FECDD3",
+    gap: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  clearPhotoEmoji: {
+    fontSize: 12,
+    color: "#E11D48",
+    fontWeight: "800",
   },
   clearPhotoText: {
-    color: "#8A9388",
-    fontSize: 12,
-    fontWeight: "600",
+    color: "#E11D48",
+    fontSize: 13,
+    fontWeight: "700",
   },
 });
