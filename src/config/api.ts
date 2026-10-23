@@ -12,4 +12,3 @@ const rawUrl = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_URL;
 
 export const API_BASE_URL = rawUrl.replace(/\/+$/, "");
 
-console.log("[LabelLens] Active API URL:", API_BASE_URL);

@@ -72,7 +72,6 @@ export default function HomeScreen() {
       );
 
       const result = JSON.parse(uploadResult.body);
-      console.log("LabelLens API raw response:", uploadResult);
 
       if (uploadResult.status < 200 || uploadResult.status >= 300) {
         throw new Error(
@@ -80,7 +79,6 @@ export default function HomeScreen() {
         );
       }
 
-      console.log("LabelLens API response:", JSON.stringify(result, null, 2));
 
       setAnalysis(result);
 
