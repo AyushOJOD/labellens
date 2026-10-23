@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "labellens-frontend",
-    "slug": "labellens-frontend",
+    "name": "LabelLens",
+    "slug": "labellens",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -17,7 +17,12 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ayush.labellens",
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "allowBackup": false
     },
     "web": {
       "output": "static",
@@ -32,11 +37,26 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "buildArchs": [
+              "arm64-v8a",
+              "armeabi-v7a"
+            ],
+            "extraProguardRules": "-keep class com.facebook.react.** { *; }\n-keep class com.facebook.hermes.** { *; }\n-keep class expo.modules.** { *; }\n-dontwarn com.facebook.react.**"
+          }
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "jsEngine": "hermes"
   }
 }
