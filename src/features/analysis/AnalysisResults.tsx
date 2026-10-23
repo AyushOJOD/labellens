@@ -109,30 +109,7 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
         ? `Per serving (${data.servingSize || "pack"}g)`
         : "Per 100 g";
 
-  return (
-    <View style={styles.resultCard}>
-      {/* Eyebrow and Regulatory Tag */}
-      <View style={styles.topRow}>
-        <Text style={styles.resultEyebrow}>YOUR NUTRITION REPORT</Text>
-        <View style={styles.fssaiPill}>
-          <Text style={styles.fssaiPillText}>🇮🇳 FSSAI & ICMR 2024</Text>
-        </View>
-      </View>
-
-      {/* Product Title & Category */}
-      <Text style={styles.resultTitle}>
-        {data.productName || "Product Analysis"}
-      </Text>
-
-      <View style={styles.metaRow}>
-        <Text style={styles.resultCategory}>
-          🏷️ {data.category ? data.category.replace(/_/g, " ") : "Packaged food"}
-        </Text>
-        <Text style={styles.metaDot}>•</Text>
-        <Text style={styles.resultBasis}>{nutritionBasisLabel}</Text>
-      </View>
-
-      // Evaluate Personal Health Profile Conflicts
+  // Evaluate Personal Health Profile Conflicts
   const personalHealthAlerts: string[] = [];
   if (userProfile) {
     const rawSugar = normalizedNutrition?.sugarsG ?? 0;
@@ -183,7 +160,30 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
     }
   }
 
-  {/* Personal Health Match Card */}
+  return (
+    <View style={styles.resultCard}>
+      {/* Eyebrow and Regulatory Tag */}
+      <View style={styles.topRow}>
+        <Text style={styles.resultEyebrow}>YOUR NUTRITION REPORT</Text>
+        <View style={styles.fssaiPill}>
+          <Text style={styles.fssaiPillText}>🇮🇳 FSSAI & ICMR 2024</Text>
+        </View>
+      </View>
+
+      {/* Product Title & Category */}
+      <Text style={styles.resultTitle}>
+        {data.productName || "Product Analysis"}
+      </Text>
+
+      <View style={styles.metaRow}>
+        <Text style={styles.resultCategory}>
+          🏷️ {data.category ? data.category.replace(/_/g, " ") : "Packaged food"}
+        </Text>
+        <Text style={styles.metaDot}>•</Text>
+        <Text style={styles.resultBasis}>{nutritionBasisLabel}</Text>
+      </View>
+
+      {/* Personal Health Match Card */}
   {userProfile && (
     <View
       style={[

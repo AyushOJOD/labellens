@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -85,7 +85,6 @@ export default function ProfileView({ onProfileUpdated }: ProfileViewProps) {
     );
   }
 
-  // Count active guards
   const activeGuardsCount =
     (profile.diabeticFriendly ? 1 : 0) +
     (profile.lowSodium ? 1 : 0) +
@@ -125,7 +124,7 @@ export default function ProfileView({ onProfileUpdated }: ProfileViewProps) {
           <Text style={styles.summaryTitle}>
             {activeGuardsCount === 0
               ? "No filters active"
-              : ${activeGuardsCount} personalized alert on}
+              : activeGuardsCount + " personalized guard" + (activeGuardsCount > 1 ? "s" : "") + " on"}
           </Text>
           <Text style={styles.summaryDesc}>
             Saved locally in private phone storage. Never uploaded to the cloud.
@@ -318,7 +317,7 @@ export default function ProfileView({ onProfileUpdated }: ProfileViewProps) {
                     isSelected && styles.allergenChipTextSelected,
                   ]}
                 >
-                  {isSelected ? ✓  : + }
+                  {isSelected ? "✓ " + allergen : "+ " + allergen}
                 </Text>
               </Pressable>
             );
