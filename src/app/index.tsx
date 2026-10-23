@@ -1,3 +1,7 @@
+﻿import AnalysisResults from "@/features/analysis/AnalysisResults";
+import BarcodeScannerModal from "@/features/barcode/BarcodeScannerModal";
+
+const API_BASE_URL = "http://192.168.29.101:5000";
 import {
   deleteScan,
   getScans,
@@ -27,6 +31,19 @@ export default function HomeScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [historyScans, setHistoryScans] = useState<ScanRecord[]>([]);
+  const [isBarcodeModalVisible, setIsBarcodeModalVisible] = useState(false);
+
+  async function handleBarcodeSuccess(result: any) {
+    setAnalysis(result);
+    await saveScan({
+      id: `${Date.now()}`,
+      scannedAt: new Date().toISOString(),
+      productName: result.data?.productName ?? "Scanned Barcode Product",
+      category: result.data?.category ?? "Packaged food",
+      headline: result.evaluation?.headline ?? "Barcode scan completed",
+      analysis: result,
+    });
+  }
 
   async function handleAnalyze() {
     if (!selectedImage) {
@@ -42,7 +59,7 @@ export default function HomeScreen() {
 
     try {
       const uploadResult = await FileSystem.uploadAsync(
-        "http://192.168.29.101:5000/api/analyze/image",
+        `${API_BASE_URL}/api/analyze/image`,
         selectedImage,
         {
           httpMethod: "POST",
@@ -54,6 +71,7 @@ export default function HomeScreen() {
       );
 
       const result = JSON.parse(uploadResult.body);
+      console.log("LabelLens API raw response:", uploadResult);
 
       if (uploadResult.status < 200 || uploadResult.status >= 300) {
         throw new Error(
@@ -284,9 +302,6 @@ export default function HomeScreen() {
         ) : (
           <>
             {/* Hero */}
-            <View style={styles.hero}></View>
-
-            {/* Hero */}
             <View style={styles.hero}>
               <Text style={styles.eyebrow}>YOUR FOOD, UNDERSTOOD</Text>
 
@@ -340,6 +355,13 @@ export default function HomeScreen() {
                 )}
               </View>
 
+              <View style={styles.scannerTipBanner}>
+                <Text style={styles.scannerTipEmoji}>💡</Text>
+                <Text style={styles.scannerTipText}>
+                  <Text style={styles.scannerTipBold}>Supermarket Tip:</Text> Photograph the back panel's <Text style={styles.scannerTipBold}>Nutrition Facts table</Text> for the best accuracy.
+                </Text>
+              </View>
+
               <Pressable
                 style={({ pressed }) => [
                   styles.scanButton,
@@ -347,14 +369,47 @@ export default function HomeScreen() {
                 ]}
                 onPress={handleScan}
                 accessibilityRole="button"
-                accessibilityLabel="Scan a product"
+                accessibilityLabel="Scan nutrition label"
               >
-                <Text style={styles.scanButtonText}>
-                  {historyScans.length > 0
-                    ? "Scan a product"
-                    : "Scan your first product"}
-                </Text>
+                <View style={styles.buttonLeftContent}>
+                  <View style={styles.buttonIconCircle}>
+                    <Text style={styles.buttonEmoji}>📸</Text>
+                  </View>
+                  <View style={styles.buttonTextWrapper}>
+                    <Text style={styles.scanButtonText}>
+                      Scan Nutrition Label
+                    </Text>
+                    <Text style={styles.scanButtonSubtitle}>
+                      Photo AI analysis & ingredients
+                    </Text>
+                  </View>
+                </View>
                 <Text style={styles.scanButtonArrow}>→</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.barcodeButton,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => setIsBarcodeModalVisible(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Scan barcode"
+              >
+                <View style={styles.buttonLeftContent}>
+                  <View style={styles.barcodeIconCircle}>
+                    <Text style={styles.buttonEmoji}>🏷️</Text>
+                  </View>
+                  <View style={styles.buttonTextWrapper}>
+                    <Text style={styles.barcodeButtonText}>
+                      Scan Barcode
+                    </Text>
+                    <Text style={styles.barcodeButtonSubtitle}>
+                      Instant 1-sec product lookup
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.barcodeButtonArrow}>→</Text>
               </Pressable>
 
               {selectedImage && (
@@ -375,126 +430,11 @@ export default function HomeScreen() {
               )}
 
               <Text style={styles.privacyNote}>
-                No barcode database required to get started
+                Instant barcode database lookup • AI label photo analysis
               </Text>
             </View>
 
-            {analysis?.success && (
-              <View style={styles.resultCard}>
-                <Text style={styles.resultEyebrow}>YOUR ANALYSIS</Text>
-
-                <Text style={styles.resultTitle}>
-                  {analysis.data?.productName || "Product analysis"}
-                </Text>
-
-                <Text style={styles.resultCategory}>
-                  {analysis.data?.category || "Food product"}
-                </Text>
-
-                <Text style={styles.resultHeadline}>
-                  {analysis.evaluation?.headline || "Analysis completed"}
-                </Text>
-
-                <Text style={styles.resultSectionTitle}>Nutrition facts</Text>
-
-                {Object.entries(analysis.data?.nutrition || {}).map(
-                  ([key, value]) => (
-                    <View key={key} style={styles.nutritionRow}>
-                      <Text style={styles.nutritionLabel}>
-                        {key
-                          .replace(/([A-Z])/g, " $1")
-                          .replace(/^./, (c) => c.toUpperCase())}
-                      </Text>
-                      <Text style={styles.nutritionValue}>
-                        {value == null ? "N/A" : String(value)}
-                      </Text>
-                    </View>
-                  ),
-                )}
-
-                <Text style={styles.resultSectionTitle}>What stands out</Text>
-
-                {analysis.evaluation?.findings?.length ? (
-                  analysis.evaluation.findings.map(
-                    (finding: any, index: number) => (
-                      <View
-                        key={`${finding.nutrient}-${index}`}
-                        style={styles.findingCard}
-                      >
-                        <View style={styles.findingHeader}>
-                          <Text style={styles.findingNutrient}>
-                            {finding.label
-                              ? finding.label.charAt(0).toUpperCase() +
-                                finding.label.slice(1)
-                              : "Nutrient"}
-                          </Text>
-
-                          <View
-                            style={[
-                              styles.severityBadge,
-                              finding.level === "high"
-                                ? styles.severityHigh
-                                : finding.level === "moderate"
-                                  ? styles.severityModerate
-                                  : styles.severityOther,
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                styles.severityText,
-                                finding.level === "high"
-                                  ? styles.severityHighText
-                                  : finding.level === "moderate"
-                                    ? styles.severityModerateText
-                                    : styles.severityOtherText,
-                              ]}
-                            >
-                              {finding.level
-                                ? finding.level.charAt(0).toUpperCase() +
-                                  finding.level.slice(1)
-                                : "Review"}
-                            </Text>
-                          </View>
-                        </View>
-
-                        <View style={styles.findingValueRow}>
-                          <Text style={styles.findingValue}>
-                            {finding.value ?? "N/A"}
-                          </Text>
-                          <Text style={styles.findingUnit}>
-                            {finding.unit ?? ""}
-                            {" / "}
-                            {finding.basis === "per_100g"
-                              ? "100 g"
-                              : finding.basis === "per_100ml"
-                                ? "100 ml"
-                                : (finding.basis ?? "serving")}
-                          </Text>
-                        </View>
-
-                        <Text style={styles.findingExplanation}>
-                          {finding.explanation ||
-                            "Review this nutrient as part of the overall nutrition profile."}
-                        </Text>
-                      </View>
-                    ),
-                  )
-                ) : (
-                  <Text style={styles.stepDescription}>
-                    No notable findings were returned for this product.
-                  </Text>
-                )}
-
-                {analysis.evaluation?.profile ===
-                  "illustrative-development-v1" && (
-                  <Text style={styles.disclaimer}>
-                    These findings use illustrative development thresholds. They
-                    are informational and are not official regulatory
-                    classifications.
-                  </Text>
-                )}
-              </View>
-            )}
+            <AnalysisResults analysis={analysis} />
 
             {/* How it works */}
             <View style={styles.section}>
@@ -579,7 +519,13 @@ export default function HomeScreen() {
           );
         })}
       </View>
-    </SafeAreaView>
+          <BarcodeScannerModal
+        visible={isBarcodeModalVisible}
+        apiBaseUrl={API_BASE_URL}
+        onClose={() => setIsBarcodeModalVisible(false)}
+        onScanSuccess={handleBarcodeSuccess}
+      />
+</SafeAreaView>
   );
 }
 
@@ -741,26 +687,114 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     backgroundColor: "#245C43",
-    borderRadius: 15,
-    minHeight: 54,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-    paddingHorizontal: 15,
+    justifyContent: "space-between",
+    marginTop: 14,
   },
-  buttonPressed: {
-    opacity: 0.82,
+  barcodeButton: {
+    backgroundColor: "#163D2B",
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: "#2D5A42",
+  },
+  buttonLeftContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  buttonIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  barcodeIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonEmoji: {
+    fontSize: 18,
+  },
+  buttonTextWrapper: {
+    flex: 1,
   },
   scanButtonText: {
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "800",
   },
+  scanButtonSubtitle: {
+    color: "#C3DAC8",
+    fontSize: 11,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  barcodeButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  barcodeButtonSubtitle: {
+    color: "#A2C4AF",
+    fontSize: 11,
+    fontWeight: "500",
+    marginTop: 2,
+  },
   scanButtonArrow: {
     color: "#FFFFFF",
-    fontSize: 21,
-    marginLeft: 10,
+    fontSize: 18,
+    fontWeight: "700",
+    marginLeft: 8,
+  },
+  barcodeButtonArrow: {
+    color: "#86EFAC",
+    fontSize: 18,
+    fontWeight: "700",
+    marginLeft: 8,
+  },
+  buttonPressed: {
+    opacity: 0.82,
+  },
+  scannerTipBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0FDF4",
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: "#DCFCE7",
+    gap: 8,
+  },
+  scannerTipEmoji: {
+    fontSize: 16,
+  },
+  scannerTipText: {
+    color: "#166534",
+    fontSize: 11,
+    lineHeight: 16,
+    flex: 1,
+  },
+  scannerTipBold: {
+    fontWeight: "700",
   },
   privacyNote: {
     color: "#8A9388",
