@@ -12,6 +12,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Pressable,
@@ -362,30 +363,94 @@ export default function HomeScreen() {
                 </Text>
               </View>
 
-              <Pressable
-                style={({ pressed }) => [
-                  styles.scanButton,
-                  pressed && styles.buttonPressed,
-                ]}
-                onPress={handleScan}
-                accessibilityRole="button"
-                accessibilityLabel="Scan nutrition label"
-              >
-                <View style={styles.buttonLeftContent}>
-                  <View style={styles.buttonIconCircle}>
-                    <Text style={styles.buttonEmoji}>📸</Text>
-                  </View>
-                  <View style={styles.buttonTextWrapper}>
-                    <Text style={styles.scanButtonText}>
-                      Scan Nutrition Label
-                    </Text>
-                    <Text style={styles.scanButtonSubtitle}>
-                      Photo AI analysis & ingredients
-                    </Text>
+              {selectedImage ? (
+                <View style={styles.analyzeCtaContainer}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.heroAnalyzeButton,
+                      isAnalyzing && styles.heroAnalyzeButtonDisabled,
+                      pressed && styles.buttonPressed,
+                    ]}
+                    onPress={handleAnalyze}
+                    disabled={isAnalyzing}
+                    accessibilityRole="button"
+                    accessibilityLabel="Analyze nutrition label with AI"
+                  >
+                    <View style={styles.heroAnalyzeLeft}>
+                      <View style={styles.heroAnalyzeIconContainer}>
+                        {isAnalyzing ? (
+                          <ActivityIndicator size="small" color="#059669" />
+                        ) : (
+                          <Text style={styles.heroAnalyzeEmoji}>🔍</Text>
+                        )}
+                      </View>
+                      <View style={styles.heroAnalyzeTextCol}>
+                        <View style={styles.heroAnalyzeTitleRow}>
+                          <Text style={styles.heroAnalyzeTitle}>
+                            {isAnalyzing ? "Analyzing Label..." : "Analyze Nutrition"}
+                          </Text>
+                          <View style={styles.heroAiBadge}>
+                            <Text style={styles.heroAiBadgeText}>✨ AI Vision</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.heroAnalyzeSubtitle}>
+                          {isAnalyzing
+                            ? "Reading FSSAI metrics, palm oil & ingredients..."
+                            : "Tap to evaluate HFSS, palm oil & additives"}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.heroAnalyzeArrowBox}>
+                      <Text style={styles.heroAnalyzeArrow}>➔</Text>
+                    </View>
+                  </Pressable>
+
+                  <View style={styles.selectedImageActions}>
+                    <Pressable
+                      style={styles.retakePhotoButton}
+                      onPress={handleScan}
+                      disabled={isAnalyzing}
+                    >
+                      <Text style={styles.retakePhotoText}>📷 Retake / Choose another</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.clearPhotoButton}
+                      onPress={() => {
+                        setSelectedImage(null);
+                        setAnalysis(null);
+                      }}
+                      disabled={isAnalyzing}
+                    >
+                      <Text style={styles.clearPhotoText}>✕ Remove</Text>
+                    </Pressable>
                   </View>
                 </View>
-                <Text style={styles.scanButtonArrow}>→</Text>
-              </Pressable>
+              ) : (
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.scanButton,
+                    pressed && styles.buttonPressed,
+                  ]}
+                  onPress={handleScan}
+                  accessibilityRole="button"
+                  accessibilityLabel="Scan nutrition label"
+                >
+                  <View style={styles.buttonLeftContent}>
+                    <View style={styles.buttonIconCircle}>
+                      <Text style={styles.buttonEmoji}>📷</Text>
+                    </View>
+                    <View style={styles.buttonTextWrapper}>
+                      <Text style={styles.scanButtonText}>
+                        Scan Nutrition Label
+                      </Text>
+                      <Text style={styles.scanButtonSubtitle}>
+                        Photo AI analysis & ingredients
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.scanButtonArrow}>➔</Text>
+                </Pressable>
+              )}
 
               <Pressable
                 style={({ pressed }) => [
@@ -409,25 +474,8 @@ export default function HomeScreen() {
                     </Text>
                   </View>
                 </View>
-                <Text style={styles.barcodeButtonArrow}>→</Text>
+                <Text style={styles.barcodeButtonArrow}>➔</Text>
               </Pressable>
-
-              {selectedImage && (
-                <Pressable
-                  style={[
-                    styles.scanButton,
-                    { marginTop: 10, backgroundColor: "#4D895D" },
-                    isAnalyzing && { opacity: 0.7 },
-                  ]}
-                  onPress={handleAnalyze}
-                  disabled={isAnalyzing}
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.scanButtonText}>
-                    {isAnalyzing ? "Analyzing product..." : "Analyze nutrition"}
-                  </Text>
-                </Pressable>
-              )}
 
               <Text style={styles.privacyNote}>
                 Instant barcode database lookup • AI label photo analysis
@@ -1171,5 +1219,120 @@ const styles = StyleSheet.create({
     color: "#B42318",
     fontSize: 12,
     fontWeight: "700",
+  },
+  analyzeCtaContainer: {
+    marginTop: 14,
+  },
+  heroAnalyzeButton: {
+    backgroundColor: "#059669",
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 2,
+    borderColor: "#34D399",
+    shadowColor: "#059669",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  heroAnalyzeButtonDisabled: {
+    opacity: 0.75,
+    backgroundColor: "#047857",
+  },
+  heroAnalyzeLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  heroAnalyzeIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  heroAnalyzeEmoji: {
+    fontSize: 22,
+  },
+  heroAnalyzeTextCol: {
+    flex: 1,
+  },
+  heroAnalyzeTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  heroAnalyzeTitle: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 0.3,
+  },
+  heroAiBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  heroAiBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "800",
+  },
+  heroAnalyzeSubtitle: {
+    color: "#D1FAE5",
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  heroAnalyzeArrowBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
+  },
+  heroAnalyzeArrow: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "900",
+  },
+  selectedImageActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 8,
+    paddingHorizontal: 4,
+  },
+  retakePhotoButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  retakePhotoText: {
+    color: "#183B2D",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  clearPhotoButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  clearPhotoText: {
+    color: "#8A9388",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

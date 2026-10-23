@@ -94,3 +94,12 @@ This document tracks all features, UI screens, components, and user experience f
 - **What it does**:
   - Replaced hardcoded IP address with dynamic environment configuration supporting EXPO_PUBLIC_API_URL.
   - Allows seamless switching between local LAN dev server (http://192.168.x.x:5000) and production cloud URL (https://labellens-backend.onrender.com) without editing component code.
+
+### 12. Hero "Analyze Nutrition" CTA & Photo Action Polish
+- **Files**: src/app/index.tsx
+- **What it does**:
+  - Transformed the hidden "Analyze nutrition" button into an impossible-to-miss **Hero CTA** with high-contrast emerald green (#059669), glowing mint border (#34D399), and elevation shadows.
+  - Added a distinct white circular icon container with a bold magnifying lens (🔍) and ✨ AI Vision badge.
+  - Swaps dynamically when a label photo is selected, placing the primary action directly under the preview image.
+  - Added quick 📷 Retake / Choose another and ✕ Remove controls so users never get stuck with an accidental picture.
+  - Smooth loading state with ActivityIndicator spinner and real-time status text.
