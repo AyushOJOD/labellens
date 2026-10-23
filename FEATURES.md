@@ -118,3 +118,15 @@ This document tracks all features, UI screens, components, and user experience f
     - Users can select allergens (*Gluten, Milk, Peanuts, Soy, Mustard, Tree nuts, Sesame, Sulphites*).
   - **Personal Health Match Banner**:
     - Every scan now checks the user's active health profile and displays a prominent **🛡️ YOUR HEALTH PROFILE MATCH** card highlighting triggered alerts or confirming a clean match.
+
+---
+
+## 📋 Upcoming Roadmap & TODO List
+
+- [ ] **MongoDB Atlas Integration (Priority for Public Launch)**
+  - **Context**: Currently using the in-memory + persistent auto-cache (\data/products.cache.json\) on Render. While the container is active, user scans expand the database in real-time. However, Render's free tier ephemeral disk resets runtime file writes on container sleep or redeploy.
+  - **Action**: Connect the backend to a free MongoDB Atlas cluster (M0 sandbox 512MB holds ~200,000 products) so crowdsourced scans persist permanently across all server restarts and redeployments.
+- [ ] **Standalone Android APK Distribution (\eas build\)**
+  - Package an installable \.apk\ for testers who don't use Expo Go.
+- [ ] **Product Health Comparison Mode (Explore Tab)**
+  - Allow side-by-side comparison of two scanned products (e.g., Maggi vs. Yippee or Parle-G vs. Marie Gold) to highlight the healthier choice.
