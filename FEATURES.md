@@ -88,3 +88,9 @@ This document tracks all features, UI screens, components, and user experience f
   - Leverages the backend's self-growing persistent auto-cache for instant sub-millisecond barcode lookups.
   - Popular Indian staples (Maggi, Parle-G, Lay's, Kurkure, Bhujia, Dairy Milk, Coke, etc.) scan and render instantly without waiting for external web APIs.
   - When users scan packaged items or capture labels with barcodes, the products are seamlessly saved to the backend database, speeding up lookups for all subsequent scans.
+
+### 11. Dynamic API URL & Production Environment Config
+- **Files**: src/config/api.ts, .env.example, src/app/index.tsx
+- **What it does**:
+  - Replaced hardcoded IP address with dynamic environment configuration supporting EXPO_PUBLIC_API_URL.
+  - Allows seamless switching between local LAN dev server (http://192.168.x.x:5000) and production cloud URL (https://labellens-backend.onrender.com) without editing component code.
