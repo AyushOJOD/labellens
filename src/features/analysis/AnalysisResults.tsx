@@ -1,4 +1,5 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
+import { getUserProfile, type UserDietaryProfile } from "@/utils/profile-storage";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type NutritionFinding = {
@@ -52,6 +53,11 @@ const NUTRIENT_METADATA: Record<
 };
 
 export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
+  const [userProfile, setUserProfile] = useState<UserDietaryProfile | null>(null);
+
+  useEffect(() => {
+    getUserProfile().then(setUserProfile);
+  }, [analysis]);
   const [showFullIngredients, setShowFullIngredients] = useState(false);
 
   if (!analysis?.success) {
@@ -126,7 +132,124 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
         <Text style={styles.resultBasis}>{nutritionBasisLabel}</Text>
       </View>
 
-      {/* Traffic Light Score Banner */}
+      // Evaluate Personal Health Profile Conflicts
+  const personalHealthAlerts: string[] = [];
+  if (userProfile) {
+    const rawSugar = normalizedNutrition?.sugarsG ?? 0;
+    const rawSodium = normalizedNutrition?.sodiumMg ?? 0;
+
+    if (userProfile.avoidPalmOil && ingredientsAnalysis?.hasPalmOil) {
+      personalHealthAlerts.push("Contains Palm Oil / Palmolein (matches your avoidance preference)");
+    }
+    if (userProfile.diabeticFriendly) {
+      if (rawSugar > 5) {
+        personalHealthAlerts.push(`Elevated Sugar (${rawSugar}g / 100g) exceeds your diabetic target`);
+      }
+      if (ingredientsAnalysis?.hiddenSugars?.length) {
+        personalHealthAlerts.push(`Hidden glycemic spike: ${ingredientsAnalysis.hiddenSugars.join(", ")}`);
+      }
+    }
+    if (userProfile.lowSodium && rawSodium > 400) {
+      personalHealthAlerts.push(`High Sodium (${rawSodium}mg / 100g) exceeds your 400mg target`);
+    }
+    if (userProfile.avoidSweeteners) {
+      const sweeteners = (ingredientsAnalysis?.additives || []).filter((a) => a.category === "sweetener");
+      if (sweeteners.length > 0) {
+        personalHealthAlerts.push(`Contains Artificial Sweeteners: ${sweeteners.map((s) => s.name || s.code).join(", ")}`);
+      }
+    }
+    if (userProfile.avoidColors) {
+      const colors = (ingredientsAnalysis?.additives || []).filter((a) => a.category === "color");
+      if (colors.length > 0) {
+        personalHealthAlerts.push(`Contains Synthetic Food Dyes: ${colors.map((c) => c.name || c.code).join(", ")}`);
+      }
+    }
+    if (userProfile.avoidFlavorEnhancers) {
+      const msg = (ingredientsAnalysis?.additives || []).filter((a) => a.category === "flavor_enhancer");
+      if (msg.length > 0) {
+        personalHealthAlerts.push(`Contains Flavor Enhancers / MSG: ${msg.map((m) => m.name || m.code).join(", ")}`);
+      }
+    }
+    if (userProfile.allergens?.length && ingredientsAnalysis?.allergens?.length) {
+      const matched = userProfile.allergens.filter((userAllergen) => {
+        const keyword = userAllergen.toLowerCase().split("/")[0].trim();
+        return ingredientsAnalysis.allergens.some((item) =>
+          item.toLowerCase().includes(keyword)
+        );
+      });
+      if (matched.length > 0) {
+        personalHealthAlerts.push(`⛔ ALLERGEN WARNING: Contains ${matched.join(", ")}!`);
+      }
+    }
+  }
+
+  {/* Personal Health Match Card */}
+  {userProfile && (
+    <View
+      style={[
+        styles.personalMatchCard,
+        personalHealthAlerts.length > 0
+          ? styles.personalMatchCardAlert
+          : styles.personalMatchCardClean,
+      ]}
+    >
+      <View style={styles.personalMatchHeader}>
+        <View style={styles.personalMatchTitleRow}>
+          <Text style={styles.personalMatchEmoji}>
+            {personalHealthAlerts.length > 0 ? "⚠️" : "🛡️"}
+          </Text>
+          <Text
+            style={[
+              styles.personalMatchTitle,
+              personalHealthAlerts.length > 0
+                ? styles.personalMatchTitleAlert
+                : styles.personalMatchTitleClean,
+            ]}
+          >
+            YOUR HEALTH PROFILE MATCH
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.personalMatchBadge,
+            personalHealthAlerts.length > 0
+              ? styles.personalMatchBadgeAlert
+              : styles.personalMatchBadgeClean,
+          ]}
+        >
+          <Text
+            style={[
+              styles.personalMatchBadgeText,
+              personalHealthAlerts.length > 0
+                ? styles.personalMatchBadgeTextAlert
+                : styles.personalMatchBadgeTextClean,
+            ]}
+          >
+            {personalHealthAlerts.length > 0
+              ? `${personalHealthAlerts.length} Alert${personalHealthAlerts.length > 1 ? "s" : ""}`
+              : "✓ Safe Match"}
+          </Text>
+        </View>
+      </View>
+
+      {personalHealthAlerts.length > 0 ? (
+        <View style={styles.personalAlertsList}>
+          {personalHealthAlerts.map((alertText, idx) => (
+            <View key={idx} style={styles.personalAlertItem}>
+              <Text style={styles.personalAlertBullet}>•</Text>
+              <Text style={styles.personalAlertText}>{alertText}</Text>
+            </View>
+          ))}
+        </View>
+      ) : (
+        <Text style={styles.personalMatchCleanText}>
+          No conflicts found with your active dietary and health preferences.
+        </Text>
+      )}
+    </View>
+  )}
+
+  {/* Traffic Light Score Banner */}
       <View
         style={[
           styles.trafficBanner,
@@ -958,5 +1081,95 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     marginTop: 18,
     textAlign: "center",
+  },
+  // Personal Health Match Card
+  personalMatchCard: {
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 14,
+    marginBottom: 6,
+    borderWidth: 1.5,
+  },
+  personalMatchCardAlert: {
+    backgroundColor: "#FFFBEB",
+    borderColor: "#FDE68A",
+  },
+  personalMatchCardClean: {
+    backgroundColor: "#F0FDF4",
+    borderColor: "#BBF7D0",
+  },
+  personalMatchHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  personalMatchTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+  personalMatchEmoji: {
+    fontSize: 15,
+  },
+  personalMatchTitle: {
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+  },
+  personalMatchTitleAlert: {
+    color: "#B45309",
+  },
+  personalMatchTitleClean: {
+    color: "#15803D",
+  },
+  personalMatchBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  personalMatchBadgeAlert: {
+    backgroundColor: "#FEE2E2",
+  },
+  personalMatchBadgeClean: {
+    backgroundColor: "#DCFCE7",
+  },
+  personalMatchBadgeText: {
+    fontSize: 10,
+    fontWeight: "800",
+  },
+  personalMatchBadgeTextAlert: {
+    color: "#B91C1C",
+  },
+  personalMatchBadgeTextClean: {
+    color: "#15803D",
+  },
+  personalAlertsList: {
+    marginTop: 10,
+    gap: 6,
+  },
+  personalAlertItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+  },
+  personalAlertBullet: {
+    color: "#DC2626",
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: "900",
+  },
+  personalAlertText: {
+    color: "#78350F",
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: "600",
+    flex: 1,
+  },
+  personalMatchCleanText: {
+    color: "#166534",
+    fontSize: 12,
+    marginTop: 6,
+    lineHeight: 17,
+    fontWeight: "500",
   },
 });

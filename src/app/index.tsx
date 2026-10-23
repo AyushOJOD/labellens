@@ -1,4 +1,5 @@
 ﻿import AnalysisResults from "@/features/analysis/AnalysisResults";
+import ProfileView from "@/features/profile/ProfileView";
 import BarcodeScannerModal from "@/features/barcode/BarcodeScannerModal";
 
 import { API_BASE_URL } from "@/config/api";
@@ -298,6 +299,8 @@ export default function HomeScreen() {
               ))
             )}
           </View>
+        ) : activeTab === "Profile" ? (
+          <ProfileView />
         ) : (
           <>
             {/* Hero */}

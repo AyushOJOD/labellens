@@ -103,3 +103,18 @@ This document tracks all features, UI screens, components, and user experience f
   - Swaps dynamically when a label photo is selected, placing the primary action directly under the preview image.
   - Added quick 📷 Retake / Choose another and ✕ Remove controls so users never get stuck with an accidental picture.
   - Smooth loading state with ActivityIndicator spinner and real-time status text.
+
+### 13. Personalized Health Profile & Custom Dietary Guards (AsyncStorage)
+- **Files**: src/utils/profile-storage.ts, src/features/profile/ProfileView.tsx, src/features/analysis/AnalysisResults.tsx, src/app/index.tsx
+- **What it does**:
+  - **Zero-Friction Offline Storage**: Stores user health preferences privately on device via @react-native-async-storage/async-storage—no sign-up or login required.
+  - **Health Goals Toggles**:
+    - Diabetic / Low-Sugar Alert: Flags products with >5g added sugar or hidden glycemic spikes (maltodextrin, invert syrup).
+    - Low-Sodium Alert: Flags foods with >400mg sodium per 100g for hypertension control.
+    - Pure Vegetarian: Flags animal by-products and gelatine.
+  - **Ingredient Avoidance Toggles**:
+    - Individual switches for Palm Oil / Palmolein, Artificial Sweeteners (INS 950/951/955), Synthetic Food Dyes (INS 102/110/122), and MSG / Flavor Enhancers (INS 621/635).
+  - **Multi-Select Allergen Chips**:
+    - Users can select allergens (*Gluten, Milk, Peanuts, Soy, Mustard, Tree nuts, Sesame, Sulphites*).
+  - **Personal Health Match Banner**:
+    - Every scan now checks the user's active health profile and displays a prominent **🛡️ YOUR HEALTH PROFILE MATCH** card highlighting triggered alerts or confirming a clean match.
