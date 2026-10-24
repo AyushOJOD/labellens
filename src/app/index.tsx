@@ -569,7 +569,7 @@ export default function HomeScreen() {
               accessibilityState={{ selected }}
             >
               {tab.name === "Profile" ? (
-                <View style={styles.navProfileWrapper}>
+                <View style={styles.navIconWrapper}>
                   <View
                     style={[
                       styles.profileHead,
@@ -582,6 +582,28 @@ export default function HomeScreen() {
                       selected && styles.profileBorderActive,
                     ]}
                   />
+                </View>
+              ) : tab.name === "History" ? (
+                <View style={styles.navIconWrapper}>
+                  <View
+                    style={[
+                      styles.clockCircle,
+                      selected && styles.clockBorderActive,
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.clockHourHand,
+                        selected && styles.clockHandActive,
+                      ]}
+                    />
+                    <View
+                      style={[
+                        styles.clockMinuteHand,
+                        selected && styles.clockHandActive,
+                      ]}
+                    />
+                  </View>
                 </View>
               ) : (
                 <Text style={[styles.navIcon, selected && styles.navIconActive]}>
@@ -955,10 +977,42 @@ const styles = StyleSheet.create({
     fontSize: 23,
     lineHeight: 27,
   },
-  navProfileWrapper: {
+  navIconWrapper: {
     height: 27,
     alignItems: "center",
     justifyContent: "center",
+  },
+  clockCircle: {
+    width: 19,
+    height: 19,
+    borderRadius: 9.5,
+    borderWidth: 1.8,
+    borderColor: "#9AA59A",
+    position: "relative",
+  },
+  clockHourHand: {
+    position: "absolute",
+    width: 1.8,
+    height: 5.5,
+    backgroundColor: "#9AA59A",
+    top: 3.5,
+    left: 6.8,
+    borderRadius: 1,
+  },
+  clockMinuteHand: {
+    position: "absolute",
+    width: 5.5,
+    height: 1.8,
+    backgroundColor: "#9AA59A",
+    top: 7.2,
+    left: 6.8,
+    borderRadius: 1,
+  },
+  clockBorderActive: {
+    borderColor: "#245C43",
+  },
+  clockHandActive: {
+    backgroundColor: "#245C43",
   },
   profileHead: {
     width: 9,
