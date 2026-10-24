@@ -68,7 +68,9 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
   const evaluation = analysis.evaluation || {};
   const findings: NutritionFinding[] = evaluation.findings || [];
   const nutrition = data.nutrition || {};
-  const ingredients: IngredientsAnalysis | undefined = evaluation.ingredientsAnalysis;
+  const normalizedNutrition = evaluation.normalizedNutrition || data.nutrition || {};
+  const ingredientsAnalysis: IngredientsAnalysis | undefined = evaluation.ingredientsAnalysis;
+  const ingredients: IngredientsAnalysis | undefined = ingredientsAnalysis;
 
   // Compute Traffic Light Health Grade
   const hasHighFindings = findings.some((f) => f.level === "high");
@@ -130,27 +132,27 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
       personalHealthAlerts.push(`High Sodium (${rawSodium}mg / 100g) exceeds your 400mg target`);
     }
     if (userProfile.avoidSweeteners) {
-      const sweeteners = (ingredientsAnalysis?.additives || []).filter((a) => a.category === "sweetener");
+      const sweeteners = (ingredientsAnalysis?.additives || []).filter((a: IngredientAdditive) => a.category === "sweetener");
       if (sweeteners.length > 0) {
-        personalHealthAlerts.push(`Contains Artificial Sweeteners: ${sweeteners.map((s) => s.name || s.code).join(", ")}`);
+        personalHealthAlerts.push(`Contains Artificial Sweeteners: ${sweeteners.map((s: IngredientAdditive) => s.name || s.code).join(", ")}`);
       }
     }
     if (userProfile.avoidColors) {
-      const colors = (ingredientsAnalysis?.additives || []).filter((a) => a.category === "color");
+      const colors = (ingredientsAnalysis?.additives || []).filter((a: IngredientAdditive) => a.category === "color");
       if (colors.length > 0) {
-        personalHealthAlerts.push(`Contains Synthetic Food Dyes: ${colors.map((c) => c.name || c.code).join(", ")}`);
+        personalHealthAlerts.push(`Contains Synthetic Food Dyes: ${colors.map((c: IngredientAdditive) => c.name || c.code).join(", ")}`);
       }
     }
     if (userProfile.avoidFlavorEnhancers) {
-      const msg = (ingredientsAnalysis?.additives || []).filter((a) => a.category === "flavor_enhancer");
+      const msg = (ingredientsAnalysis?.additives || []).filter((a: IngredientAdditive) => a.category === "flavor_enhancer");
       if (msg.length > 0) {
-        personalHealthAlerts.push(`Contains Flavor Enhancers / MSG: ${msg.map((m) => m.name || m.code).join(", ")}`);
+        personalHealthAlerts.push(`Contains Flavor Enhancers / MSG: ${msg.map((m: IngredientAdditive) => m.name || m.code).join(", ")}`);
       }
     }
     if (userProfile.allergens?.length && ingredientsAnalysis?.allergens?.length) {
       const matched = userProfile.allergens.filter((userAllergen) => {
         const keyword = userAllergen.toLowerCase().split("/")[0].trim();
-        return ingredientsAnalysis.allergens.some((item) =>
+        return ingredientsAnalysis.allergens.some((item: string) =>
           item.toLowerCase().includes(keyword)
         );
       });
