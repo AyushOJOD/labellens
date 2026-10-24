@@ -555,7 +555,7 @@ export default function HomeScreen() {
           [
             { name: "Home", icon: "⌂" },
             { name: "History", icon: "◷" },
-            { name: "Profile", icon: "○" },
+            { name: "Profile", icon: "profile" },
           ] as const
         ).map((tab) => {
           const selected = activeTab === tab.name;
@@ -568,9 +568,26 @@ export default function HomeScreen() {
               accessibilityRole="button"
               accessibilityState={{ selected }}
             >
-              <Text style={[styles.navIcon, selected && styles.navIconActive]}>
-                {tab.icon}
-              </Text>
+              {tab.name === "Profile" ? (
+                <View style={styles.navProfileWrapper}>
+                  <View
+                    style={[
+                      styles.profileHead,
+                      selected && styles.profileBorderActive,
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.profileBody,
+                      selected && styles.profileBorderActive,
+                    ]}
+                  />
+                </View>
+              ) : (
+                <Text style={[styles.navIcon, selected && styles.navIconActive]}>
+                  {tab.icon}
+                </Text>
+              )}
               <Text
                 style={[styles.navLabel, selected && styles.navLabelActive]}
               >
@@ -937,6 +954,31 @@ const styles = StyleSheet.create({
     color: "#9AA59A",
     fontSize: 23,
     lineHeight: 27,
+  },
+  navProfileWrapper: {
+    height: 27,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileHead: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    borderWidth: 1.8,
+    borderColor: "#9AA59A",
+  },
+  profileBody: {
+    width: 17,
+    height: 8,
+    borderTopLeftRadius: 9,
+    borderTopRightRadius: 9,
+    borderWidth: 1.8,
+    borderBottomWidth: 0,
+    borderColor: "#9AA59A",
+    marginTop: 1.5,
+  },
+  profileBorderActive: {
+    borderColor: "#245C43",
   },
   navIconActive: {
     color: "#245C43",
