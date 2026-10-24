@@ -11,7 +11,7 @@ import {
 } from "@/utils/scan-storage";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -34,6 +34,11 @@ export default function HomeScreen() {
   const [analysis, setAnalysis] = useState<any>(null);
   const [historyScans, setHistoryScans] = useState<ScanRecord[]>([]);
   const [isBarcodeModalVisible, setIsBarcodeModalVisible] = useState(false);
+
+  // Silently pre-warm Render cloud server on app launch
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/health`).catch(() => {});
+  }, []);
 
   async function handleBarcodeSuccess(result: any) {
     setAnalysis(result);

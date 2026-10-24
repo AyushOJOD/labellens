@@ -31,18 +31,22 @@ export default function BarcodeScannerModal({
   const [torchEnabled, setTorchEnabled] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isUserCancelledRef = useRef(false);
 
   // Automatically reset scanning state and cancel pending lookups whenever modal is closed
   useEffect(() => {
     if (!visible) {
-      cleanupPendingSearch();
+      cleanupPendingSearch(true);
       setManualCode("");
       setShowManualInput(false);
       setTorchEnabled(false);
     }
   }, [visible]);
 
-  function cleanupPendingSearch() {
+  function cleanupPendingSearch(isUserAction = false) {
+    if (isUserAction) {
+      isUserCancelledRef.current = true;
+    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -51,7 +55,7 @@ export default function BarcodeScannerModal({
   }
 
   function handleClose() {
-    cleanupPendingSearch();
+    cleanupPendingSearch(true);
     setManualCode("");
     setShowManualInput(false);
     setTorchEnabled(false);
@@ -59,20 +63,21 @@ export default function BarcodeScannerModal({
   }
 
   function handleCancelSearch() {
-    cleanupPendingSearch();
+    cleanupPendingSearch(true);
   }
 
   async function handleBarcodeLookup(barcode: string) {
     if (isScanning) return;
     setIsScanning(true);
+    isUserCancelledRef.current = false;
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    // Client-side 7-second safety timeout so it never hangs
+    // Safety timeout: 35 seconds to comfortably allow for cloud server cold-starts
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 7000);
+    }, 35000);
 
     try {
       const response = await fetch(
@@ -116,17 +121,27 @@ export default function BarcodeScannerModal({
       abortControllerRef.current = null;
       setIsScanning(false);
 
-      if (error?.name === "AbortError") {
-        // User canceled search or request timed out
+      // If user deliberately canceled or closed modal, silently return without errors
+      if (isUserCancelledRef.current) {
+        isUserCancelledRef.current = false;
+        return;
+      }
+
+      const isCanceledOrTimeout =
+        error?.name === "AbortError" ||
+        error?.message?.toLowerCase().includes("cancel") ||
+        error?.message?.toLowerCase().includes("abort") ||
+        error?.cause?.name === "AbortError";
+
+      if (isCanceledOrTimeout) {
         Alert.alert(
           "Lookup Timed Out",
-          "The database took too long to respond. You can try scanning again or photograph the nutrition label directly.",
+          "The server took too long to respond. The cloud database may be waking up from sleep. Please try scanning again in a few moments, or take a photo of the label.",
           [{ text: "OK" }],
         );
         return;
       }
 
-      console.error("Barcode lookup error:", error);
       Alert.alert(
         "Lookup Failed",
         "Unable to connect to the LabelLens server. Please check your network connection.",
