@@ -208,7 +208,7 @@ export default function AnalysisResults({ analysis }: AnalysisResultsProps) {
                 : styles.personalMatchTitleClean,
             ]}
           >
-            YOUR HEALTH PROFILE MATCH
+            HEALTH PROFILE MATCH
           </Text>
         </View>
         <View
@@ -1104,11 +1104,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 8,
   },
   personalMatchTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
+    gap: 6,
+    flex: 1,
+    flexShrink: 1,
   },
   personalMatchEmoji: {
     fontSize: 15,
@@ -1116,7 +1119,8 @@ const styles = StyleSheet.create({
   personalMatchTitle: {
     fontSize: 11,
     fontWeight: "900",
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
+    flexShrink: 1,
   },
   personalMatchTitleAlert: {
     color: "#B45309",
@@ -1128,6 +1132,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
+    flexShrink: 0,
   },
   personalMatchBadgeAlert: {
     backgroundColor: "#FEE2E2",
